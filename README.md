@@ -37,6 +37,10 @@ docker compose ps         # esperar a que ambos estén "healthy"
 
 En este perfil (`prod`) Swagger está apagado. Los usuarios son `admin` y `reader` con las contraseñas del `.env`.
 
+### Interfaz web
+
+Con la app corriendo, abre http://localhost:8080. Es una página sencilla (HTML y JavaScript, sin dependencias) para iniciar sesión, listar, buscar, crear, editar y eliminar empleados. Con el usuario `reader` solo se puede consultar. Los errores de validación de la API se muestran junto a cada campo.
+
 ### Pruebas
 
 ```bash
@@ -111,7 +115,7 @@ Todos los errores usan el mismo formato:
   "error": "Bad Request",
   "message": "Validation failed",
   "path": "/employees",
-  "errors": [
+  "validationErrors": [
     { "field": "[0].birthDate", "message": "Invalid value '31-02-1990', expected a valid date with format dd-MM-yyyy" }
   ]
 }
