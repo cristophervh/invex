@@ -15,39 +15,80 @@ Prueba técnica para el puesto de Java Backend Senior.
 - Actuator y Micrometer (Prometheus)
 - Docker, Docker Compose, GitHub Actions
 
-## Cómo ejecutarlo
+## Revisión rápida (paso a paso)
 
-### Opción 1: local con H2 (no necesita nada más que Java 17)
+Solo se necesita **Java 17** y **Git**. No hace falta instalar Maven (el proyecto trae el wrapper `mvnw`) ni base de datos (el perfil `local` usa H2 en memoria).
+
+1. Verificar Java:
+
+   ```bash
+   java -version        # debe decir 17
+   ```
+
+2. Clonar la rama `main`:
+
+   ```bash
+   git clone -b main https://github.com/cristophervh/invex.git
+   cd invex
+   ```
+
+3. Compilar y correr las pruebas:
+
+   ```bash
+   ./mvnw verify
+   ```
+
+   Corre 76 pruebas (unitarias, de controlador, de repositorio e integración) y falla si la cobertura de líneas baja de 80 %. Debe terminar en `BUILD SUCCESS`. El reporte de cobertura queda en `target/site/jacoco/index.html`.
+
+4. Levantar la aplicación:
+
+   ```bash
+   ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+   ```
+
+   Está lista cuando aparece `Started EmployeeServiceApplication`.
+
+5. Abrir en el navegador:
+
+   | Qué | URL |
+   |---|---|
+   | Interfaz web | http://localhost:8080 |
+   | Swagger UI | http://localhost:8080/swagger-ui.html |
+   | Estado de la app | http://localhost:8080/actuator/health |
+
+   Usuarios del perfil local: `admin / admin123` (lectura y escritura) y `reader / reader123` (solo lectura).
+
+6. Probar con Postman: importar los dos archivos de [postman/](postman/), elegir el ambiente **Employee Service - local** y ejecutar la colección completa (**Run collection**). Son 21 peticiones; la primera obtiene el token y lo guarda para las demás. Para volver a correrla desde cero, reiniciar la aplicación.
+
+### Problemas comunes
+
+| Síntoma | Solución |
+|---|---|
+| `Port 8080 was already in use` | Detener la otra instancia (`kill $(lsof -ti tcp:8080)` en macOS/Linux) o usar otro puerto: `SERVER_PORT=8081 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local` |
+| `401 Unauthorized` en `/employees` | Falta el token. Pedirlo en `POST /auth/token` y enviarlo como `Authorization: Bearer <token>` (en Swagger, botón **Authorize**) |
+| Maven no descarga dependencias (`No route to host`) | La red bloquea Maven Central. Configurar un espejo en `~/.m2/settings.xml` o cambiar de red |
+
+## Ejecutar con Docker y MySQL
+
+Requiere Docker Desktop.
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
-```
-
-- API: http://localhost:8080
-- Swagger: http://localhost:8080/swagger-ui.html
-- Usuarios: `admin / admin123` (lectura y escritura) y `reader / reader123` (solo lectura)
-
-### Opción 2: Docker Compose con MySQL
-
-```bash
-cp .env.example .env      # cambia las contraseñas
+cp .env.example .env      # cambiar las contraseñas
 docker compose up -d --build
-docker compose ps         # esperar a que ambos estén "healthy"
+docker compose ps         # esperar a que ambos servicios estén "healthy"
 ```
 
-En este perfil (`prod`) Swagger está apagado. Los usuarios son `admin` y `reader` con las contraseñas del `.env`.
+La API queda en http://localhost:8080 con MySQL 8.4. Este es el perfil `prod`: Swagger está apagado y los usuarios `admin` y `reader` usan las contraseñas del `.env`. Para detenerlo: `docker compose down` (agregar `-v` para borrar también los datos).
 
-### Interfaz web
+## Interfaz web
 
-Con la app corriendo, abre http://localhost:8080. Es una página sencilla (HTML y JavaScript, sin dependencias) para iniciar sesión, listar, buscar, crear, editar y eliminar empleados. Con el usuario `reader` solo se puede consultar. Los errores de validación de la API se muestran junto a cada campo.
+Página sencilla (HTML, CSS y JavaScript, sin dependencias) servida por la misma aplicación en `/`. Permite iniciar sesión, listar, buscar, crear, editar y eliminar empleados. Con el usuario `reader` solo se puede consultar. Los errores de validación de la API se muestran junto a cada campo.
 
-### Pruebas
+![Lista de empleados](docs/evidence/ui-list.png)
 
-```bash
-./mvnw verify
-```
+![Error de validación junto al campo](docs/evidence/ui-validation.png)
 
-Corre 76 pruebas (unitarias, de controlador, de repositorio e integración) y revisa que la cobertura de líneas sea de al menos 80 %.
+**Video de la demo (1 minuto):** [docs/evidence/demo.mp4](docs/evidence/demo.mp4). Recorre Swagger, Actuator, login, alta con fecha inválida (400), alta correcta (201), duplicado (409), edición parcial, búsqueda, borrado (204) y el usuario de solo lectura.
 
 ## Autenticación
 
