@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Employee Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+    <h1>Employee Service</h1>
+    <div id="session" class="session" hidden>
+        <span id="current-user"></span>
+        <button id="logout" class="link">Log out</button>
+    </div>
+</header>
+
+<main>
+    <section id="login-view" class="card narrow">
+        <h2>Sign in</h2>
+        <form id="login-form">
+            <label>Username <input name="username" autocomplete="username" required></label>
+            <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+            <p class="error" id="login-error" hidden></p>
+            <button type="submit">Sign in</button>
+        </form>
+        <p class="hint">Local profile users: <code>admin / admin123</code> and <code>reader / reader123</code></p>
+    </section>
+
+    <section id="app-view" hidden>
+        <div class="toolbar">
+            <form id="search-form" class="search">
+                <input name="name" placeholder="Search by name" minlength="2" maxlength="50">
+                <button type="submit">Search</button>
+                <button type="button" id="clear-search" class="secondary">Clear</button>
+            </form>
+            <button id="new-employee" data-admin>New employee</button>
+        </div>
+
+        <p class="error" id="list-error" hidden></p>
+
+        <div class="card table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Birth date</th>
+                    <th>Position</th>
+                    <th>Active</th>
+                    <th>Created at (UTC)</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="employee-rows"></tbody>
+            </table>
+            <p id="empty" class="empty" hidden>No employees found.</p>
+        </div>
+    </section>
+</main>
+
+<dialog id="employee-dialog">
+    <form id="employee-form" method="dialog" novalidate>
+        <h2 id="dialog-title">New employee</h2>
+        <div class="grid">
+            <label>First name <input name="firstName"></label>
+            <label>Middle name <input name="middleName"></label>
+            <label>Last name <input name="lastName"></label>
+            <label>Second last name <input name="secondLastName"></label>
+            <label>Birth date <input name="birthDate" placeholder="dd-MM-yyyy"></label>
+            <label>Age <input name="age" type="number" min="18" max="100"></label>
+            <label>Gender
+                <select name="gender">
+                    <option value="">Select</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </label>
+            <label>Position <input name="position"></label>
+            <label class="checkbox"><input name="active" type="checkbox" checked> Active</label>
+        </div>
+        <p class="error" id="form-error" hidden></p>
+        <div class="actions">
+            <button type="button" id="cancel" class="secondary">Cancel</button>
+            <button type="submit" id="save">Save</button>
+        </div>
+    </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
