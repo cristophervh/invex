@@ -15,6 +15,9 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
+  jackson:
+    deserialization:
+      accept-single-value-as-array: true
 
 server:
   port: ${SERVER_PORT:8080}
