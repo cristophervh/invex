@@ -60,6 +60,14 @@ class EmployeeRepositoryTest {
         assertThat(noMatch).isEmpty();
     }
 
+    @Test
+    void shouldTreatWildcardsAsPlainText() {
+        employeeRepository.saveAndFlush(buildEmployee());
+
+        assertThat(employeeRepository.searchByName("!%")).isEmpty();
+        assertThat(employeeRepository.searchByName("!_")).isEmpty();
+    }
+
     private Employee buildEmployee() {
         Employee employee = new Employee();
         employee.setFirstName("Ana");

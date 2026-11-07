@@ -18,6 +18,8 @@ spring:
   jackson:
     deserialization:
       accept-single-value-as-array: true
+    mapper:
+      accept-case-insensitive-enums: true
 
 server:
   port: ${SERVER_PORT:8080}
