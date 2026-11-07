@@ -7,3 +7,10 @@ spring:
 logging:
   level:
     com.invex.employees: DEBUG
+
+# Local development only. Never reuse these values outside your machine.
+app:
+  security:
+    jwt-secret: local-development-secret-change-me-0123456789
+    admin-password: admin123
+    reader-password: reader123
