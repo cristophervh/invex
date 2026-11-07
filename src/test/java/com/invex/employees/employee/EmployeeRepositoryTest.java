@@ -3,6 +3,7 @@ package com.invex.employees.employee;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,19 @@ class EmployeeRepositoryTest {
         Employee updated = employeeRepository.saveAndFlush(saved);
 
         assertThat(updated.getVersion()).isEqualTo(1L);
+    }
+
+    @Test
+    void shouldSearchByAnyPartOfTheNameIgnoringCase() {
+        employeeRepository.saveAndFlush(buildEmployee());
+
+        List<Employee> byLastName = employeeRepository.searchByName("garc");
+        List<Employee> bySecondLastName = employeeRepository.searchByName("LÓPEZ");
+        List<Employee> noMatch = employeeRepository.searchByName("xyz");
+
+        assertThat(byLastName).hasSize(1);
+        assertThat(bySecondLastName).hasSize(1);
+        assertThat(noMatch).isEmpty();
     }
 
     private Employee buildEmployee() {
