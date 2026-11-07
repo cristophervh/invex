@@ -27,13 +27,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.invex.employees.employee.dto.EmployeeResponse;
 import com.invex.employees.exception.EmployeeNotFoundException;
+import com.invex.employees.security.SecurityConfig;
+import com.invex.employees.security.SecurityErrorHandler;
 
 @WebMvcTest(EmployeeController.class)
-@Import(AgeCalculator.class)
+@Import({AgeCalculator.class, SecurityConfig.class, SecurityErrorHandler.class})
+@ActiveProfiles("test")
+@WithMockUser(roles = "ADMIN")
 class EmployeeControllerTest {
 
     @TestConfiguration

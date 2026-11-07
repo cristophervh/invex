@@ -8,3 +8,9 @@ logging:
   level:
     root: WARN
     com.invex.employees: INFO
+
+app:
+  security:
+    jwt-secret: test-secret-for-automated-tests-0123456789
+    admin-password: admin-test
+    reader-password: reader-test

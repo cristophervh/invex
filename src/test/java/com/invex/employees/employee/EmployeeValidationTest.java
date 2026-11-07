@@ -27,18 +27,24 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.invex.employees.exception.DuplicateEmployeeException;
 import com.invex.employees.exception.InvalidEmployeeDataException;
+import com.invex.employees.security.SecurityConfig;
+import com.invex.employees.security.SecurityErrorHandler;
 
 /**
  * Input validation rules, checked through the HTTP layer so the error body is verified too.
  * The clock is fixed on 6 November 2026.
  */
 @WebMvcTest(EmployeeController.class)
-@Import(AgeCalculator.class)
+@Import({AgeCalculator.class, SecurityConfig.class, SecurityErrorHandler.class})
+@ActiveProfiles("test")
+@WithMockUser(roles = "ADMIN")
 class EmployeeValidationTest {
 
     @TestConfiguration
