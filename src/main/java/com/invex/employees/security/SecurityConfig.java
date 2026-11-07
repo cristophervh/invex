@@ -46,6 +46,7 @@ public class SecurityConfig {
     public static final String ROLES_CLAIM = "roles";
 
     private static final String[] PUBLIC_PATHS = {
+            "/", "/index.html", "/app.js", "/styles.css", "/favicon.ico",
             "/auth/token",
             "/actuator/health", "/actuator/health/**", "/actuator/info", "/actuator/prometheus",
             "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml",
