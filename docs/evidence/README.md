@@ -75,6 +75,14 @@ Log de la petición, con el token enmascarado:
 2026-11-07 05:15:06.710  INFO [0ed10cdc-dcae-4db5-9958-0f62717b3750] c.i.e.logging.RequestLoggingFilter - POST /employees -> 201 (124 ms) headers={accept=*/*, authorization=***, content-length=139, content-type=application/json, host=localhost:8080, user-agent=curl/8.5.0}
 ```
 
+## Interfaz web
+
+Video de la demo (1 minuto, con subtítulos): [demo.mp4](demo.mp4)
+
+![Lista de empleados](ui-list.png)
+
+![Error de validación](ui-validation.png)
+
 ## Swagger UI
 
 ![Swagger UI](swagger-ui.png)
