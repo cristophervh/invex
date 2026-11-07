@@ -1,5 +1,5 @@
 # ---- Build stage ----
-FROM eclipse-temurin:17-jdk-jammy AS build
+FROM eclipse-temurin:25-jdk-jammy AS build
 WORKDIR /workspace
 
 # Download dependencies first so they are cached between builds
@@ -12,7 +12,7 @@ RUN ./mvnw -B -q package -DskipTests \
     && java -Djarmode=layertools -jar target/employee-service-*.jar extract --destination target/extracted
 
 # ---- Runtime stage ----
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 WORKDIR /app
 
 # Non-root user. Group 0 keeps the image compatible with OpenShift random UIDs.
