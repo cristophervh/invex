@@ -13,14 +13,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,13 +33,23 @@ import com.invex.employees.employee.dto.EmployeeResponse;
 import com.invex.employees.exception.EmployeeNotFoundException;
 
 @WebMvcTest(EmployeeController.class)
+@Import(AgeCalculator.class)
 class EmployeeControllerTest {
+
+    @TestConfiguration
+    static class FixedClockConfig {
+
+        @Bean
+        Clock clock() {
+            return Clock.fixed(Instant.parse("2026-11-06T12:00:00Z"), ZoneOffset.UTC);
+        }
+    }
 
     private static final String VALID_EMPLOYEE = """
             {
               "firstName": "Ana",
               "lastName": "García",
-              "age": 35,
+              "age": 36,
               "gender": "FEMALE",
               "birthDate": "15-05-1990",
               "position": "Backend Developer"
@@ -163,7 +178,7 @@ class EmployeeControllerTest {
     }
 
     private EmployeeResponse buildResponse() {
-        return new EmployeeResponse(1L, "Ana", null, "García", null, 35, Gender.FEMALE,
+        return new EmployeeResponse(1L, "Ana", null, "García", null, 36, Gender.FEMALE,
                 LocalDate.of(1990, 5, 15), "Backend Developer", Instant.now(), true);
     }
 }

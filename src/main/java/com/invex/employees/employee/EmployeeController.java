@@ -1,6 +1,9 @@
 package com.invex.employees.employee;
 
 import static com.invex.employees.employee.EmployeeConstants.BASE_PATH;
+import static com.invex.employees.employee.EmployeeConstants.MAX_BATCH_SIZE;
+import static com.invex.employees.employee.EmployeeConstants.NAME_MAX_LENGTH;
+import static com.invex.employees.employee.EmployeeConstants.SEARCH_MIN_LENGTH;
 
 import java.util.List;
 
@@ -9,6 +12,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +56,7 @@ public class EmployeeController {
     // Accepts a single employee or an array (see spring.jackson.deserialization in application.yml)
     @PostMapping
     public ResponseEntity<List<EmployeeResponse>> create(
-            @RequestBody @NotEmpty List<@NotNull @Valid EmployeeRequest> requests) {
+            @RequestBody @NotEmpty @Size(max = MAX_BATCH_SIZE) List<@NotNull @Valid EmployeeRequest> requests) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.create(requests));
     }
 
@@ -69,7 +73,8 @@ public class EmployeeController {
     }
 
     @GetMapping("/search")
-    public List<EmployeeResponse> search(@RequestParam @NotBlank String name) {
+    public List<EmployeeResponse> search(
+            @RequestParam @NotBlank @Size(min = SEARCH_MIN_LENGTH, max = NAME_MAX_LENGTH) String name) {
         return employeeService.searchByName(name);
     }
 }

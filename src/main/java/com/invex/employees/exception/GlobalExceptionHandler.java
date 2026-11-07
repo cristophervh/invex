@@ -1,6 +1,8 @@
 package com.invex.employees.exception;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +11,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -21,6 +24,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.invex.employees.employee.EmployeeConstants;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -31,6 +38,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(EmployeeNotFoundException ex, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(DuplicateEmployeeException.class)
+    public ResponseEntity<ApiError> handleDuplicate(DuplicateEmployeeException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(InvalidEmployeeDataException.class)
+    public ResponseEntity<ApiError> handleInvalidData(InvalidEmployeeDataException ex, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -55,6 +72,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadableBody(HttpMessageNotReadableException ex,
                                                          HttpServletRequest request) {
+        if (ex.getCause() instanceof InvalidFormatException invalidFormat) {
+            String field = fieldPath(invalidFormat);
+            String message = "Invalid value '" + invalidFormat.getValue() + "'" + expectedValues(invalidFormat);
+            return build(HttpStatus.BAD_REQUEST, VALIDATION_FAILED, request,
+                    List.of(new ApiError.FieldValidationError(field, message)));
+        }
         return build(HttpStatus.BAD_REQUEST, "Request body is missing or malformed", request, List.of());
     }
 
@@ -98,14 +121,44 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", request, List.of());
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex,
+                                                        HttpServletRequest request) {
+        log.warn("Data integrity violation on {} {}", request.getMethod(), request.getRequestURI());
+        return build(HttpStatus.CONFLICT, "The request conflicts with existing data", request, List.of());
+    }
+
     private ResponseEntity<ApiError> build(HttpStatus status, String message, HttpServletRequest request,
                                            List<ApiError.FieldValidationError> errors) {
-        ApiError body = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(),
+        ApiError body = new ApiError(Instant.now(), status.value(), status.getReasonPhrase(),
                 message, request.getRequestURI(), errors);
         return ResponseEntity.status(status).body(body);
     }
 
     // "create.requests[1].firstName" -> "[1].firstName", "search.name" -> "name"
+    private String fieldPath(InvalidFormatException ex) {
+        StringBuilder path = new StringBuilder();
+        for (JsonMappingException.Reference reference : ex.getPath()) {
+            if (reference.getFieldName() != null) {
+                path.append(path.length() > 0 ? "." : "").append(reference.getFieldName());
+            } else {
+                path.append('[').append(reference.getIndex()).append(']');
+            }
+        }
+        return path.toString();
+    }
+
+    private String expectedValues(InvalidFormatException ex) {
+        Class<?> targetType = ex.getTargetType();
+        if (targetType.isEnum()) {
+            return ", allowed values: " + Arrays.toString(targetType.getEnumConstants());
+        }
+        if (LocalDate.class.equals(targetType)) {
+            return ", expected a valid date with format " + EmployeeConstants.DATE_PATTERN;
+        }
+        return "";
+    }
+
     private String fieldName(ConstraintViolation<?> violation) {
         String path = violation.getPropertyPath().toString().replace(".<list element>", "");
         int firstDot = path.indexOf('.');
