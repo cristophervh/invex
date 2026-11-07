@@ -46,8 +46,10 @@ public class SecurityConfig {
     public static final String ROLES_CLAIM = "roles";
 
     private static final String[] PUBLIC_PATHS = {
-            "/auth/token", "/actuator/health/**", "/actuator/info", "/v3/api-docs/**", "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/auth/token",
+            "/actuator/health/**", "/actuator/info",
+            "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml",
+            "/swagger-ui/**", "/swagger-ui.html"
     };
 
     @Bean
